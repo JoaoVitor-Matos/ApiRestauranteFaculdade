@@ -194,5 +194,3 @@ Contribuições são bem-vindas! Sinta-se à vontade para:
 - Enviar pull requests
 
 ---
-
-**Desenvolvido com ❤️ para facilitar a gestão de pedidos de restaurante**
