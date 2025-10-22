@@ -181,16 +181,3 @@ A aplicação registra logs detalhados incluindo:
 rm -rf node_modules package-lock.json
 npm install
 ```
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT.
-
-## 🤝 Contribuição
-
-Contribuições são bem-vindas! Sinta-se à vontade para:
-- Reportar bugs
-- Sugerir novas funcionalidades
-- Enviar pull requests
-
----
