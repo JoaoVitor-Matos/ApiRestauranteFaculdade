@@ -1,198 +1,110 @@
 # 🍕 API Restaurante
 
-API REST para sistema de pedidos de restaurante desenvolvida em TypeScript com Node.js, Express e Supabase (PostgreSQL).
+API REST para gestão de pedidos de restaurante com TypeScript, Node.js, Express e Supabase.
 
-## 🚀 Funcionalidades
+## 🚀 Instalação
 
-- ✅ CRUD completo de pedidos
-- ✅ Listagem de produtos disponíveis
-- ✅ Validações de dados
-- ✅ Tratamento de erros
-- ✅ Integração com Supabase (PostgreSQL)
-- ✅ TypeScript com tipagem completa
-- ✅ Estrutura modular e organizada
+```bash
+npm install
+cp env.example .env
+```
 
-## 📋 Rotas da API
+Configure o `.env` com suas credenciais do Supabase e execute:
+
+```bash
+npm run dev
+```
+
+A API estará em `http://localhost:3000`
+
+## 📋 Endpoints
+
+### Produtos
+- `GET /api/produtos` - Listar produtos
+- `GET /api/produtos/:id` - Buscar produto
+
+### Mesas
+- `GET /api/mesas` - Listar mesas
+
+### Comandas
+- `POST /api/comandas` - Criar comanda (mesa fica ocupada)
+- `GET /api/comandas` - Listar comandas
+- `PATCH /api/comandas/:id/encerrar` - Encerrar comanda (libera mesa e calcula total)
 
 ### Pedidos
-- `POST /api/pedidos` - Criar um novo pedido
+- `POST /api/pedidos` - Criar pedido (status inicial: "aguardando preparo")
 - `GET /api/pedidos` - Listar todos os pedidos
+- `GET /api/pedidos/prontos` - Listar pedidos prontos
+- `GET /api/pedidos/em-preparo` - Listar pedidos em preparo
 - `GET /api/pedidos/:id` - Buscar pedido específico
 - `PATCH /api/pedidos/:id` - Atualizar status do pedido
 - `DELETE /api/pedidos/:id` - Excluir pedido
 
-### Produtos
-- `GET /api/produtos` - Listar todos os produtos
-- `GET /api/produtos/:id` - Buscar produto específico
+## 📝 Exemplos de Uso
 
-### Utilitários
-- `GET /api/health` - Health check da API
-- `GET /` - Documentação da API
+### 1. Criar comanda
+```json
+POST /api/comandas
+{
+  "nome_cliente": "João Silva",
+  "mesa_id": 1
+}
+```
+✅ Mesa fica com status "ocupada"
 
-## 🛠️ Instalação e Configuração
+### 2. Criar pedido
+```json
+POST /api/pedidos
+{
+  "comanda_id": 1,
+  "produto_id": 1,
+  "quantidade": 2
+}
+```
+✅ Status inicial: "aguardando preparo"
 
-### 1. Pré-requisitos
-- Node.js (versão 16 ou superior)
-- npm ou yarn
-- Conta no Supabase
+### 3. Atualizar status do pedido
+```json
+PATCH /api/pedidos/1
+{
+  "status": "em preparo"
+}
+```
+**Status válidos:** `aguardando preparo`, `em preparo`, `pronto`, `cancelado`, `entregue`
 
-### 2. Clone e instale dependências
-```bash
-# Clone o repositório (se aplicável)
-# cd api-restaurante
-
-# Instale as dependências
-npm install
+### 4. Listar pedidos prontos
+```
+GET /api/pedidos/prontos
 ```
 
-### 3. Configuração do Supabase
-
-1. Acesse [supabase.com](https://supabase.com) e crie um novo projeto
-2. No painel do Supabase, vá em **SQL Editor**
-3. Execute o script SQL do arquivo `database-schema.sql` (copie e cole o conteúdo)
-4. Vá em **Settings > API** e copie:
-   - **Project URL**
-   - **Service Role Key** (não a anon key!)
-
-### 4. Configuração das variáveis de ambiente
-
-1. Crie um arquivo `.env` na raiz do projeto:
-```bash
-cp env.example .env
+### 5. Listar pedidos em preparo
+```
+GET /api/pedidos/em-preparo
 ```
 
-2. Edite o arquivo `.env` com suas credenciais:
-```env
-SUPABASE_URL=https://seu-projeto-id.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-PORT=3000
+### 6. Encerrar comanda
 ```
-
-### 5. Executar a aplicação
-
-```bash
-# Modo desenvolvimento (com nodemon)
-npm run dev
-
-# Modo produção (após build)
-npm run build
-npm start
+PATCH /api/comandas/1/encerrar
 ```
+✅ Calcula total automaticamente  
+✅ Mesa volta para status "disponivel"
 
-A API estará disponível em `http://localhost:3000`
+## 🔄 Fluxo Completo
 
-## 📊 Estrutura do Banco de Dados
+1. Cliente chega → `GET /api/mesas` (verificar disponibilidade)
+2. Criar comanda → `POST /api/comandas` (mesa fica ocupada)
+3. Fazer pedidos → `POST /api/pedidos` (status: aguardando preparo)
+4. Atualizar pedidos → `PATCH /api/pedidos/:id` (para "em preparo" ou "pronto")
+5. Encerrar conta → `PATCH /api/comandas/:id/encerrar` (calcula total e libera mesa)
 
-### Tabela `produtos`
-- `id` (bigint, primary key, autoincrement)
-- `nome` (text)
-- `preco` (numeric)
-- `disponibilidade` (boolean, default true)
-- `created_at` (timestamp)
-- `updated_at` (timestamp)
+## 🔧 Scripts
 
-### Tabela `pedidos`
-- `id` (bigint, primary key, autoincrement)
-- `cliente` (text)
-- `produto_id` (bigint, foreign key → produtos.id)
-- `quantidade` (integer)
-- `status` (text, default 'pendente')
-- `criado_em` (timestamp)
-- `updated_at` (timestamp)
+- `npm run dev` - Desenvolvimento
+- `npm run build` - Build
+- `npm start` - Produção
 
-### Status dos pedidos
-- `pendente` - Pedido criado, aguardando preparo
-- `preparando` - Pedido em preparação
-- `pronto` - Pedido pronto para entrega
-- `entregue` - Pedido entregue
-- `cancelado` - Pedido cancelado
+## 📊 Configuração do Banco
 
-## 🧪 Exemplos de Uso
-
-### Criar um pedido
-```bash
-curl -X POST http://localhost:3000/api/pedidos \
-  -H "Content-Type: application/json" \
-  -d '{
-    "cliente": "João Silva",
-    "produto_id": 1,
-    "quantidade": 2
-  }'
-```
-
-### Listar todos os pedidos
-```bash
-curl http://localhost:3000/api/pedidos
-```
-
-### Atualizar status do pedido
-```bash
-curl -X PATCH http://localhost:3000/api/pedidos/1 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "status": "preparando"
-  }'
-```
-
-### Listar produtos
-```bash
-curl http://localhost:3000/api/produtos
-```
-
-
-## 🔧 Scripts Disponíveis
-
-- `npm run dev` - Inicia o servidor em modo desenvolvimento com nodemon
-- `npm run build` - Compila o TypeScript para JavaScript
-- `npm start` - Inicia o servidor em modo produção
-
-## 🐛 Tratamento de Erros
-
-A API retorna códigos de status HTTP apropriados:
-
-- `200` - Sucesso
-- `201` - Criado com sucesso
-- `400` - Erro de validação
-- `404` - Recurso não encontrado
-- `500` - Erro interno do servidor
-
-## 📝 Logs
-
-A aplicação registra logs detalhados incluindo:
-- Requisições HTTP (método, path, timestamp)
-- Erros de conexão com o Supabase
-- Validações de dados
-- Operações de banco de dados
-
-## 🚨 Troubleshooting
-
-### Erro de conexão com Supabase
-- Verifique se as variáveis `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` estão corretas
-- Certifique-se de usar a **Service Role Key** e não a anon key
-- Verifique se o projeto Supabase está ativo
-
-### Tabelas não encontradas
-- Execute o script SQL do arquivo `database-schema.sql` no painel do Supabase
-- Verifique se as tabelas foram criadas corretamente
-
-### Erro de dependências
-```bash
-# Limpe o cache e reinstale
-rm -rf node_modules package-lock.json
-npm install
-```
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT.
-
-## 🤝 Contribuição
-
-Contribuições são bem-vindas! Sinta-se à vontade para:
-- Reportar bugs
-- Sugerir novas funcionalidades
-- Enviar pull requests
-
----
-
-**Desenvolvido com ❤️ para facilitar a gestão de pedidos de restaurante**
+Execute no Supabase SQL Editor:
+1. `database-schema.sql` - Estrutura inicial
+2. `create-comandas-table.sql` - Tabela de comandas

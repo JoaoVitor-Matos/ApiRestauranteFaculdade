@@ -7,21 +7,22 @@ export interface Produto {
 
 export interface Pedido {
   id: number;
-  cliente: string;
+  comanda_id: number;
+  mesa_id: number;
   produto_id: number;
   quantidade: number;
-  status: 'pendente' | 'preparando' | 'pronto' | 'entregue' | 'cancelado';
+  status: 'aguardando preparo' | 'em preparo' | 'cancelado' | 'pronto' | 'entregue';
   criado_em: string;
 }
 
 export interface CreatePedidoRequest {
-  cliente: string;
+  comanda_id: number;
   produto_id: number;
   quantidade: number;
 }
 
 export interface UpdatePedidoRequest {
-  status: 'pendente' | 'preparando' | 'pronto' | 'entregue' | 'cancelado';
+  status: 'aguardando preparo' | 'em preparo' | 'cancelado' | 'pronto' | 'entregue';
 }
 
 export interface CreateProdutoRequest {

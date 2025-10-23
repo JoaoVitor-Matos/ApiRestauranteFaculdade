@@ -5,11 +5,11 @@ import { CreatePedidoRequest, UpdatePedidoRequest, Pedido } from '../types';
 export class PedidosController {
   static async criarPedido(req: Request, res: Response): Promise<void> {
     try {
-      const { cliente, produto_id, quantidade }: CreatePedidoRequest = req.body;
+      const { comanda_id, produto_id, quantidade }: any = req.body;
 
-      if (!cliente || !produto_id || !quantidade) {
+      if (!comanda_id || !produto_id || !quantidade) {
         res.status(400).json({
-          error: 'Campos obrigatórios: cliente, produto_id e quantidade'
+          error: 'Campos obrigatórios: comanda_id, produto_id e quantidade'
         });
         return;
       }
@@ -17,6 +17,26 @@ export class PedidosController {
       if (quantidade <= 0) {
         res.status(400).json({
           error: 'Quantidade deve ser maior que zero'
+        });
+        return;
+      }
+
+      const { data: comanda, error: comandaError } = await supabase
+        .from('comandas')
+        .select('*')
+        .eq('id', comanda_id)
+        .single();
+
+      if (comandaError || !comanda) {
+        res.status(404).json({
+          error: 'Comanda não encontrada'
+        });
+        return;
+      }
+
+      if (comanda.status === 'encerrada') {
+        res.status(400).json({
+          error: 'Não é possível adicionar pedidos a uma comanda encerrada'
         });
         return;
       }
@@ -44,10 +64,12 @@ export class PedidosController {
       const { data: novoPedido, error: insertError } = await supabase
         .from('pedidos')
         .insert({
-          cliente,
+          comanda_id,
+          mesa_id: comanda.mesa_id,
+          cliente: comanda.nome_cliente,
           produto_id,
           quantidade,
-          status: 'pendente'
+          status: 'aguardando preparo'
         })
         .select()
         .single();
@@ -159,7 +181,7 @@ export class PedidosController {
         return;
       }
 
-      const statusValidos = ['pendente', 'preparando', 'pronto', 'entregue', 'cancelado'];
+      const statusValidos = ['aguardando preparo', 'em preparo', 'pronto', 'cancelado', 'entregue'];
       if (!status || !statusValidos.includes(status)) {
         res.status(400).json({
           error: `Status deve ser um dos seguintes: ${statusValidos.join(', ')}`
@@ -231,6 +253,80 @@ export class PedidosController {
       res.status(204).send();
     } catch (error) {
       console.error('Erro no controller excluirPedido:', error);
+      res.status(500).json({
+        error: 'Erro interno do servidor'
+      });
+    }
+  }
+
+  static async listarPedidosProntos(req: Request, res: Response): Promise<void> {
+    try {
+      const { data: pedidos, error } = await supabase
+        .from('pedidos')
+        .select(`
+          *,
+          produtos (
+            nome,
+            preco
+          ),
+          mesas (
+            numero
+          ),
+          comandas (
+            nome_cliente
+          )
+        `)
+        .eq('status', 'pronto')
+        .order('criado_em', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar pedidos prontos:', error);
+        res.status(500).json({
+          error: 'Erro ao buscar pedidos prontos'
+        });
+        return;
+      }
+
+      res.json(pedidos);
+    } catch (error) {
+      console.error('Erro no controller listarPedidosProntos:', error);
+      res.status(500).json({
+        error: 'Erro interno do servidor'
+      });
+    }
+  }
+
+  static async listarPedidosEmPreparo(req: Request, res: Response): Promise<void> {
+    try {
+      const { data: pedidos, error } = await supabase
+        .from('pedidos')
+        .select(`
+          *,
+          produtos (
+            nome,
+            preco
+          ),
+          mesas (
+            numero
+          ),
+          comandas (
+            nome_cliente
+          )
+        `)
+        .eq('status', 'em preparo')
+        .order('criado_em', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar pedidos em preparo:', error);
+        res.status(500).json({
+          error: 'Erro ao buscar pedidos em preparo'
+        });
+        return;
+      }
+
+      res.json(pedidos);
+    } catch (error) {
+      console.error('Erro no controller listarPedidosEmPreparo:', error);
       res.status(500).json({
         error: 'Erro interno do servidor'
       });
