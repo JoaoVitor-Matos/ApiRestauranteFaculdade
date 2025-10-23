@@ -86,6 +86,16 @@ export class ComandasController {
             numero,
             capacidade,
             status
+          ),
+          pedidos (
+            id,
+            produto_id,
+            quantidade,
+            status,
+            produtos (
+              nome,
+              preco
+            )
           )
         `)
         .order('created_at', { ascending: false });
@@ -99,9 +109,89 @@ export class ComandasController {
         return;
       }
 
-      res.json(comandas);
+      const comandasComTotal = comandas?.map(comanda => {
+        let total = 0;
+        if (comanda.pedidos && Array.isArray(comanda.pedidos)) {
+          total = comanda.pedidos.reduce((sum: number, pedido: any) => {
+            const preco = pedido.produtos?.preco || 0;
+            const quantidade = pedido.quantidade || 0;
+            return sum + (preco * quantidade);
+          }, 0);
+        }
+        return {
+          ...comanda,
+          total: parseFloat(total.toFixed(2))
+        };
+      });
+
+      res.json(comandasComTotal);
     } catch (error) {
       console.error('Erro no controller listarComandas:', error);
+      res.status(500).json({
+        erro: 'Erro interno do servidor'
+      });
+    }
+  }
+
+  static async buscarComanda(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const comandaId = parseInt(id);
+
+      if (isNaN(comandaId)) {
+        res.status(400).json({
+          erro: 'ID da comanda deve ser um número válido'
+        });
+        return;
+      }
+
+      const { data: comanda, error } = await supabase
+        .from('comandas')
+        .select(`
+          *,
+          mesas (
+            numero,
+            capacidade,
+            status
+          ),
+          pedidos (
+            id,
+            produto_id,
+            quantidade,
+            status,
+            produtos (
+              nome,
+              preco
+            )
+          )
+        `)
+        .eq('id', comandaId)
+        .single();
+
+      if (error || !comanda) {
+        res.status(404).json({
+          erro: 'Comanda não encontrada'
+        });
+        return;
+      }
+
+      let total = 0;
+      if (comanda.pedidos && Array.isArray(comanda.pedidos)) {
+        total = comanda.pedidos.reduce((sum: number, pedido: any) => {
+          const preco = pedido.produtos?.preco || 0;
+          const quantidade = pedido.quantidade || 0;
+          return sum + (preco * quantidade);
+        }, 0);
+      }
+
+      const comandaComTotal = {
+        ...comanda,
+        total: parseFloat(total.toFixed(2))
+      };
+
+      res.json(comandaComTotal);
+    } catch (error) {
+      console.error('Erro no controller buscarComanda:', error);
       res.status(500).json({
         erro: 'Erro interno do servidor'
       });

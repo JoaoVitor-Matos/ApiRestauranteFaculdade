@@ -5,20 +5,52 @@ import { CreatePedidoRequest, UpdatePedidoRequest, Pedido } from '../types';
 export class PedidosController {
   static async criarPedido(req: Request, res: Response): Promise<void> {
     try {
-      const { comanda_id, produto_id, quantidade }: any = req.body;
+      const body = req.body;
+      let pedidos: any[];
+      let comanda_id: number;
 
-      if (!comanda_id || !produto_id || !quantidade) {
+      if (Array.isArray(body)) {
+        pedidos = body;
+        comanda_id = pedidos[0]?.comanda_id;
+      } else if (body.pedidos && Array.isArray(body.pedidos)) {
+        comanda_id = body.comanda_id;
+        pedidos = body.pedidos.map((p: any) => ({
+          ...p,
+          comanda_id: body.comanda_id
+        }));
+      } else {
+        pedidos = [body];
+        comanda_id = body.comanda_id;
+      }
+
+      if (pedidos.length === 0) {
         res.status(400).json({
-          error: 'Campos obrigatórios: comanda_id, produto_id e quantidade'
+          error: 'É necessário enviar pelo menos um pedido'
         });
         return;
       }
 
-      if (quantidade <= 0) {
+      if (!comanda_id) {
         res.status(400).json({
-          error: 'Quantidade deve ser maior que zero'
+          error: 'comanda_id é obrigatório'
         });
         return;
+      }
+
+      for (const pedido of pedidos) {
+        if (!pedido.produto_id || !pedido.quantidade) {
+          res.status(400).json({
+            error: 'Cada pedido deve ter: produto_id e quantidade'
+          });
+          return;
+        }
+
+        if (pedido.quantidade <= 0) {
+          res.status(400).json({
+            error: 'Quantidade deve ser maior que zero'
+          });
+          return;
+        }
       }
 
       const { data: comanda, error: comandaError } = await supabase
@@ -41,38 +73,43 @@ export class PedidosController {
         return;
       }
 
-      const { data: produto, error: produtoError } = await supabase
+      const produtoIds = [...new Set(pedidos.map((p: any) => p.produto_id))];
+      const { data: produtos, error: produtosError } = await supabase
         .from('produtos')
         .select('*')
-        .eq('id', produto_id)
-        .single();
+        .in('id', produtoIds);
 
-      if (produtoError || !produto) {
+      if (produtosError || !produtos || produtos.length !== produtoIds.length) {
         res.status(404).json({
-          error: 'Produto não encontrado'
+          error: 'Um ou mais produtos não foram encontrados'
         });
         return;
       }
 
-      if (!produto.disponibilidade) {
-        res.status(400).json({
-          error: 'Produto não está disponível'
-        });
-        return;
+      const produtosMap = new Map(produtos.map(p => [p.id, p]));
+      for (const pedido of pedidos) {
+        const produto = produtosMap.get(pedido.produto_id);
+        if (!produto?.disponibilidade) {
+          res.status(400).json({
+            error: `Produto ${produto?.nome || pedido.produto_id} não está disponível`
+          });
+          return;
+        }
       }
 
-      const { data: novoPedido, error: insertError } = await supabase
+      const pedidosParaInserir = pedidos.map((pedido: any) => ({
+        comanda_id: comanda_id,
+        mesa_id: comanda.mesa_id,
+        cliente: comanda.nome_cliente,
+        produto_id: pedido.produto_id,
+        quantidade: pedido.quantidade,
+        status: 'aguardando preparo'
+      }));
+
+      const { data: novosPedidos, error: insertError } = await supabase
         .from('pedidos')
-        .insert({
-          comanda_id,
-          mesa_id: comanda.mesa_id,
-          cliente: comanda.nome_cliente,
-          produto_id,
-          quantidade,
-          status: 'aguardando preparo'
-        })
-        .select()
-        .single();
+        .insert(pedidosParaInserir)
+        .select();
 
       if (insertError) {
         console.error('Erro ao criar pedido:', insertError);
@@ -82,7 +119,7 @@ export class PedidosController {
         return;
       }
 
-      res.status(201).json(novoPedido);
+      res.status(201).json(Array.isArray(body) || body.pedidos ? novosPedidos : novosPedidos[0]);
     } catch (error) {
       console.error('Erro no controller criarPedido:', error);
       res.status(500).json({

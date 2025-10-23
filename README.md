@@ -28,7 +28,8 @@ A API estará em `http://localhost:3000`
 
 ### Comandas
 - `POST /api/comandas` - Criar comanda (mesa fica ocupada)
-- `GET /api/comandas` - Listar comandas
+- `GET /api/comandas` - Listar todas as comandas com total calculado
+- `GET /api/comandas/:id` - Buscar comanda específica com total calculado
 - `PATCH /api/comandas/:id/encerrar` - Encerrar comanda (libera mesa e calcula total)
 
 ### Pedidos
@@ -52,7 +53,7 @@ POST /api/comandas
 ```
 ✅ Mesa fica com status "ocupada"
 
-### 2. Criar pedido
+### 2. Criar pedido (um produto)
 ```json
 POST /api/pedidos
 {
@@ -63,7 +64,45 @@ POST /api/pedidos
 ```
 ✅ Status inicial: "aguardando preparo"
 
-### 3. Atualizar status do pedido
+### 3. Criar múltiplos pedidos de uma vez
+**Opção 1 - Array de pedidos:**
+```json
+POST /api/pedidos
+[
+  {
+    "comanda_id": 1,
+    "produto_id": 1,
+    "quantidade": 2
+  },
+  {
+    "comanda_id": 1,
+    "produto_id": 3,
+    "quantidade": 1
+  },
+  {
+    "comanda_id": 1,
+    "produto_id": 5,
+    "quantidade": 3
+  }
+]
+```
+
+**Opção 2 - Objeto com array de pedidos:**
+```json
+POST /api/pedidos
+{
+  "comanda_id": 1,
+  "pedidos": [
+    { "produto_id": 1, "quantidade": 2 },
+    { "produto_id": 3, "quantidade": 1 },
+    { "produto_id": 5, "quantidade": 3 }
+  ]
+}
+```
+✅ Todos os pedidos são criados de uma vez  
+✅ Validação automática de produtos e comanda
+
+### 4. Atualizar status do pedido
 ```json
 PATCH /api/pedidos/1
 {
@@ -72,17 +111,42 @@ PATCH /api/pedidos/1
 ```
 **Status válidos:** `aguardando preparo`, `em preparo`, `pronto`, `cancelado`, `entregue`
 
-### 4. Listar pedidos prontos
+### 5. Listar pedidos prontos
 ```
 GET /api/pedidos/prontos
 ```
 
-### 5. Listar pedidos em preparo
+### 6. Listar pedidos em preparo
 ```
 GET /api/pedidos/em-preparo
 ```
 
-### 6. Encerrar comanda
+### 7. Buscar comanda específica com total
+```
+GET /api/comandas/3
+```
+**Resposta:**
+```json
+{
+  "id": 3,
+  "nome_cliente": "João",
+  "mesa_id": 1,
+  "status": "aberta",
+  "mesas": { "numero": 1, "status": "ocupada", "capacidade": 2 },
+  "pedidos": [
+    {
+      "id": 5,
+      "produto_id": 1,
+      "quantidade": 2,
+      "status": "aguardando preparo",
+      "produtos": { "nome": "Pizza Margherita", "preco": 25.9 }
+    }
+  ],
+  "total": 108.4
+}
+```
+
+### 8. Encerrar comanda
 ```
 PATCH /api/comandas/1/encerrar
 ```
@@ -94,8 +158,9 @@ PATCH /api/comandas/1/encerrar
 1. Cliente chega → `GET /api/mesas` (verificar disponibilidade)
 2. Criar comanda → `POST /api/comandas` (mesa fica ocupada)
 3. Fazer pedidos → `POST /api/pedidos` (status: aguardando preparo)
-4. Atualizar pedidos → `PATCH /api/pedidos/:id` (para "em preparo" ou "pronto")
-5. Encerrar conta → `PATCH /api/comandas/:id/encerrar` (calcula total e libera mesa)
+4. Consultar comanda → `GET /api/comandas/:id` (ver pedidos e total)
+5. Atualizar pedidos → `PATCH /api/pedidos/:id` (para "em preparo" ou "pronto")
+6. Encerrar conta → `PATCH /api/comandas/:id/encerrar` (calcula total e libera mesa)
 
 ## 🔧 Scripts
 
