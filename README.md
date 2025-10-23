@@ -25,10 +25,6 @@ API REST para sistema de pedidos de restaurante desenvolvida em TypeScript com N
 - `GET /api/produtos` - Listar todos os produtos
 - `GET /api/produtos/:id` - Buscar produto específico
 
-### Utilitários
-- `GET /api/health` - Health check da API
-- `GET /` - Documentação da API
-
 ## 🛠️ Instalação e Configuração
 
 ### 1. Pré-requisitos
