@@ -29,3 +29,24 @@ export interface CreateProdutoRequest {
   preco: number;
   disponibilidade?: boolean;
 }
+
+export interface Mesa {
+  id: number;
+  numero: number;
+  capacidade: number;
+  status: string;
+}
+
+export interface Comanda {
+  id: number;
+  nome_cliente: string;
+  mesa_id: number;
+  status: 'aberta' | 'encerrada';
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateComandaRequest {
+  nome_cliente: string;
+  mesa_id: number;
+}

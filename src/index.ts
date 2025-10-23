@@ -26,6 +26,7 @@ app.get('/', (req, res) => {
     endpoints: {
       pedidos: '/api/pedidos',
       produtos: '/api/produtos',
+      mesas: '/api/mesas',
       health: '/api/health'
     },
     documentation: {
@@ -35,7 +36,8 @@ app.get('/', (req, res) => {
       atualizar_pedido: 'PATCH /api/pedidos/:id',
       excluir_pedido: 'DELETE /api/pedidos/:id',
       listar_produtos: 'GET /api/produtos',
-      buscar_produto: 'GET /api/produtos/:id'
+      buscar_produto: 'GET /api/produtos/:id',
+      listar_mesas: 'GET /api/mesas'
     }
   });
 });
@@ -85,6 +87,7 @@ async function startServer() {
       console.log('  DELETE /api/pedidos/:id      - Excluir pedido');
       console.log('  GET    /api/produtos         - Listar produtos');
       console.log('  GET    /api/produtos/:id     - Buscar produto');
+      console.log('  GET    /api/mesas            - Listar mesas');
       console.log('');
       console.log('Para testar a API, use ferramentas como Postman, Insomnia ou curl');
     });
