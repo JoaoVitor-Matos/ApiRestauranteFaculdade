@@ -4,6 +4,35 @@ API REST para gestão de pedidos de restaurante com TypeScript, Node.js, Express
 
 ## 🚀 Instalação
 
+- ✅ CRUD completo de pedidos
+- ✅ Listagem de produtos disponíveis
+- ✅ Validações de dados
+- ✅ Tratamento de erros
+- ✅ Integração com Supabase (PostgreSQL)
+- ✅ TypeScript com tipagem completa
+- ✅ Estrutura modular e organizada
+
+## 📋 Rotas da API
+
+### Pedidos
+- `POST /api/pedidos` - Criar um novo pedido
+- `GET /api/pedidos` - Listar todos os pedidos
+- `GET /api/pedidos/:id` - Buscar pedido específico
+- `PATCH /api/pedidos/:id` - Atualizar status do pedido
+- `DELETE /api/pedidos/:id` - Excluir pedido
+
+### Produtos
+- `GET /api/produtos` - Listar todos os produtos
+- `GET /api/produtos/:id` - Buscar produto específico
+
+## 🛠️ Instalação e Configuração
+
+### 1. Pré-requisitos
+- Node.js (versão 16 ou superior)
+- npm ou yarn
+- Conta no Supabase
+
+### 2. Clone e instale dependências
 ```bash
 npm install
 cp env.example .env
@@ -86,25 +115,3 @@ GET /api/pedidos/em-preparo
 ```
 PATCH /api/comandas/1/encerrar
 ```
-✅ Calcula total automaticamente  
-✅ Mesa volta para status "disponivel"
-
-## 🔄 Fluxo Completo
-
-1. Cliente chega → `GET /api/mesas` (verificar disponibilidade)
-2. Criar comanda → `POST /api/comandas` (mesa fica ocupada)
-3. Fazer pedidos → `POST /api/pedidos` (status: aguardando preparo)
-4. Atualizar pedidos → `PATCH /api/pedidos/:id` (para "em preparo" ou "pronto")
-5. Encerrar conta → `PATCH /api/comandas/:id/encerrar` (calcula total e libera mesa)
-
-## 🔧 Scripts
-
-- `npm run dev` - Desenvolvimento
-- `npm run build` - Build
-- `npm start` - Produção
-
-## 📊 Configuração do Banco
-
-Execute no Supabase SQL Editor:
-1. `database-schema.sql` - Estrutura inicial
-2. `create-comandas-table.sql` - Tabela de comandas
