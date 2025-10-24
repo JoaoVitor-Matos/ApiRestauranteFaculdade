@@ -154,7 +154,7 @@ GET /api/comandas/3
       "produtos": { "nome": "Pizza Margherita", "preco": 25.9 }
     }
   ],
-  "total": 108.4
+  "total": 51,8
 }
 ```
 
