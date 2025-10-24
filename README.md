@@ -2,7 +2,19 @@
 
 API REST para gestão de pedidos de restaurante com TypeScript, Node.js, Express e Supabase.
 
-## 🚀 Instalação
+## ✨ Funcionalidades
+
+- ✅ Sistema completo de comandas e mesas
+- ✅ CRUD completo de pedidos
+- ✅ Listagem de produtos disponíveis
+- ✅ Cálculo automático de totais
+- ✅ Validações de dados
+- ✅ Tratamento de erros
+- ✅ Integração com Supabase (PostgreSQL)
+- ✅ TypeScript com tipagem completa
+- ✅ Estrutura modular e organizada
+
+## � Instalação
 
 ```bash
 npm install
