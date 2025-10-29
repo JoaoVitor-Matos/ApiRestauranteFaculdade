@@ -82,8 +82,6 @@ export class ComandasController {
       const inicioDoDia = getStartOfDay();
       const finalDoDia = getEndOfDay();
 
-      console.log('Buscando comandas entre', inicioDoDia, 'e', finalDoDia);
-
       const { data: comandas, error } = await supabase
         .from('comandas')
         .select(`
