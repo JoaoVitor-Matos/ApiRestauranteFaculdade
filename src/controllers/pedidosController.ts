@@ -369,4 +369,41 @@ export class PedidosController {
       });
     }
   }
+
+  static async listarPedidosAguardando(req: Request, res: Response): Promise<void> {
+    try {
+      const { data: pedidos, error } = await supabase
+        .from('pedidos')
+        .select(`
+          *,
+          produtos (
+            nome,
+            preco
+          ),
+          mesas (
+            numero
+          ),
+          comandas (
+            nome_cliente
+          )
+        `)
+        .eq('status', 'aguardando preparo')
+        .order('criado_em', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar pedidos aguardando preparo:', error);
+        res.status(500).json({
+          error: 'Erro ao buscar pedidos aguardando preparo'
+        });
+        return;
+      }
+
+      res.json(pedidos);
+    } catch (error) {
+      console.error('Erro no controller listarPedidosAguardando:', error);
+      res.status(500).json({
+        error: 'Erro interno do servidor'
+      });
+    }
+  }
 }

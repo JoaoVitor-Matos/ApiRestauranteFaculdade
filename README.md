@@ -47,8 +47,9 @@ A API estará em `http://localhost:3000`
 ### Pedidos
 - `POST /api/pedidos` - Criar pedido (status inicial: "aguardando preparo")
 - `GET /api/pedidos` - Listar todos os pedidos
-- `GET /api/pedidos/prontos` - Listar pedidos prontos
+- `GET /api/pedidos/aguardando` - Listar pedidos aguardando preparo
 - `GET /api/pedidos/em-preparo` - Listar pedidos em preparo
+- `GET /api/pedidos/prontos` - Listar pedidos prontos
 - `GET /api/pedidos/:id` - Buscar pedido específico
 - `PATCH /api/pedidos/:id` - Atualizar status do pedido
 - `DELETE /api/pedidos/:id` - Excluir pedido
@@ -123,9 +124,9 @@ PATCH /api/pedidos/1
 ```
 **Status válidos:** `aguardando preparo`, `em preparo`, `pronto`, `cancelado`, `entregue`
 
-### 5. Listar pedidos prontos
+### 5. Listar pedidos aguardando preparo
 ```
-GET /api/pedidos/prontos
+GET /api/pedidos/aguardando
 ```
 
 ### 6. Listar pedidos em preparo
@@ -133,7 +134,12 @@ GET /api/pedidos/prontos
 GET /api/pedidos/em-preparo
 ```
 
-### 7. Buscar comanda específica com total
+### 7. Listar pedidos prontos
+```
+GET /api/pedidos/prontos
+```
+
+### 8. Buscar comanda específica com total
 ```
 GET /api/comandas/3
 ```
