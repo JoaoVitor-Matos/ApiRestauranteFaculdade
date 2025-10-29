@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase } from '../services/supabaseClient';
 import { CreateComandaRequest } from '../types';
+import { getEndOfDay, getStartOfDay } from '../utils/dateUtil';
 
 export class ComandasController {
   static async criarComanda(req: Request, res: Response): Promise<void> {
@@ -78,6 +79,11 @@ export class ComandasController {
 
   static async listarComandas(req: Request, res: Response): Promise<void> {
     try {
+      const inicioDoDia = getStartOfDay();
+      const finalDoDia = getEndOfDay();
+
+      console.log('Buscando comandas entre', inicioDoDia, 'e', finalDoDia);
+
       const { data: comandas, error } = await supabase
         .from('comandas')
         .select(`
@@ -98,6 +104,8 @@ export class ComandasController {
             )
           )
         `)
+        .gte('created_at', inicioDoDia)
+        .lte('created_at', finalDoDia)
         .order('created_at', { ascending: false });
 
       if (error) {
