@@ -41,6 +41,7 @@ A API estará em `http://localhost:3000`
 ### Comandas
 - `POST /api/comandas` - Criar comanda (mesa fica ocupada)
 - `GET /api/comandas` - Listar todas as comandas com total calculado
+- `GET /api/comandas/abertas/hoje` - Listar comandas abertas do dia atual
 - `GET /api/comandas/:id` - Buscar comanda específica com total calculado
 - `PATCH /api/comandas/:id/encerrar` - Encerrar comanda (libera mesa e calcula total)
 
@@ -139,7 +140,15 @@ GET /api/pedidos/em-preparo
 GET /api/pedidos/prontos
 ```
 
-### 8. Buscar comanda específica com total
+### 8. Listar comandas abertas do dia
+```
+GET /api/comandas/abertas/hoje
+```
+✅ Filtra apenas comandas com status "aberta"  
+✅ Criadas no dia atual  
+✅ Inclui total calculado e informações de mesa/pedidos
+
+### 9. Buscar comanda específica com total
 ```
 GET /api/comandas/3
 ```
@@ -164,7 +173,7 @@ GET /api/comandas/3
 }
 ```
 
-### 8. Encerrar comanda
+### 10. Encerrar comanda
 ```
 PATCH /api/comandas/1/encerrar
 ```

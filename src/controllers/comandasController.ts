@@ -294,4 +294,63 @@ export class ComandasController {
       });
     }
   }
+
+  static async listarComandasAbertasHoje(req: Request, res: Response): Promise<void> {
+    try {
+      const inicioDoDia = getStartOfDay();
+      const finalDoDia = getEndOfDay();
+
+      const { data: comandas, error } = await supabase
+        .from('comandas')
+        .select(`
+          *,
+          mesas (
+            numero,
+            capacidade,
+            status
+          ),
+          pedidos (
+            id,
+            produto_id,
+            quantidade,
+            status,
+            produtos (
+              nome,
+              preco
+            )
+          )
+        `)
+        .eq('status', 'aberta')
+        .gte('created_at', inicioDoDia)
+        .lte('created_at', finalDoDia)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar comandas abertas:', error);
+        res.status(500).json({
+          erro: 'Erro ao buscar comandas abertas',
+          detalhes: error.message
+        });
+        return;
+      }
+
+      const comandasComTotal = comandas?.map(comanda => {
+        const total = comanda.pedidos?.reduce((sum: number, pedido: any) => {
+          return sum + ((pedido.produtos?.preco || 0) * (pedido.quantidade || 0));
+        }, 0) || 0;
+
+        return {
+          ...comanda,
+          total: parseFloat(total.toFixed(2))
+        };
+      });
+
+      res.json(comandasComTotal);
+    } catch (error) {
+      console.error('Erro no controller listarComandasAbertasHoje:', error);
+      res.status(500).json({
+        erro: 'Erro interno do servidor'
+      });
+    }
+  }
 }

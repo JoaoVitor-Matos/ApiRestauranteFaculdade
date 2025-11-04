@@ -5,6 +5,7 @@ const router = Router();
 
 router.post('/', ComandasController.criarComanda);
 router.get('/', ComandasController.listarComandas);
+router.get('/abertas/hoje', ComandasController.listarComandasAbertasHoje);
 router.get('/:id', ComandasController.buscarComanda);
 router.patch('/:id/encerrar', ComandasController.encerrarComanda);
 
