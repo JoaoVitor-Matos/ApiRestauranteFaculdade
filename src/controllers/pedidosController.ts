@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase } from '../services/supabaseClient';
 import { CreatePedidoRequest, UpdatePedidoRequest, Pedido } from '../types';
+import { getEndOfDay, getStartOfDay } from '../utils/dateUtil';
 
 export class PedidosController {
   static async criarPedido(req: Request, res: Response): Promise<void> {
@@ -130,6 +131,9 @@ export class PedidosController {
 
   static async listarPedidos(req: Request, res: Response): Promise<void> {
     try {
+      const inicioDoDia = getStartOfDay();
+      const finalDoDia = getEndOfDay();
+
       const { data: pedidos, error } = await supabase
         .from('pedidos')
         .select(`
@@ -139,6 +143,8 @@ export class PedidosController {
             preco
           )
         `)
+        .gte('criado_em', inicioDoDia)
+        .lte('criado_em', finalDoDia)
         .order('criado_em', { ascending: false });
 
       if (error) {
@@ -298,6 +304,9 @@ export class PedidosController {
 
   static async listarPedidosProntos(req: Request, res: Response): Promise<void> {
     try {
+      const inicioDoDia = getStartOfDay();
+      const finalDoDia = getEndOfDay();
+
       const { data: pedidos, error } = await supabase
         .from('pedidos')
         .select(`
@@ -314,6 +323,8 @@ export class PedidosController {
           )
         `)
         .eq('status', 'pronto')
+        .gte('criado_em', inicioDoDia)
+        .lte('criado_em', finalDoDia)
         .order('criado_em', { ascending: false });
 
       if (error) {
@@ -335,6 +346,9 @@ export class PedidosController {
 
   static async listarPedidosEmPreparo(req: Request, res: Response): Promise<void> {
     try {
+      const inicioDoDia = getStartOfDay();
+      const finalDoDia = getEndOfDay();
+
       const { data: pedidos, error } = await supabase
         .from('pedidos')
         .select(`
@@ -351,6 +365,8 @@ export class PedidosController {
           )
         `)
         .eq('status', 'em preparo')
+        .gte('criado_em', inicioDoDia)
+        .lte('criado_em', finalDoDia)
         .order('criado_em', { ascending: false });
 
       if (error) {
@@ -372,6 +388,9 @@ export class PedidosController {
 
   static async listarPedidosAguardando(req: Request, res: Response): Promise<void> {
     try {
+      const inicioDoDia = getStartOfDay();
+      const finalDoDia = getEndOfDay();
+
       const { data: pedidos, error } = await supabase
         .from('pedidos')
         .select(`
@@ -388,6 +407,8 @@ export class PedidosController {
           )
         `)
         .eq('status', 'aguardando preparo')
+        .gte('criado_em', inicioDoDia)
+        .lte('criado_em', finalDoDia)
         .order('criado_em', { ascending: false });
 
       if (error) {

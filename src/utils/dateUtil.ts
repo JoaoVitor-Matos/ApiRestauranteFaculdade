@@ -7,17 +7,15 @@
 export const getStartOfDay = (date: Date = new Date()): string => {
   const start = new Date(date);
   start.setHours(0, 0, 0, 0);
-  return start.toISOString();
+  const offset = start.getTimezoneOffset() * 60000;
+  const localStart = new Date(start.getTime() - offset);
+  return localStart.toISOString().slice(0, -1);
 };
 
-/**
- * Retorna o fim exato (23:59:59.999) da data fornecida.
- * Se nenhuma data for fornecida, usa o dia atual.
- * @param date A data para calcular o fim (opcional).
- * @returns A string ISO formatada para o fim do dia.
- */
 export const getEndOfDay = (date: Date = new Date()): string => {
   const end = new Date(date);
   end.setHours(23, 59, 59, 999);
-  return end.toISOString();
+  const offset = end.getTimezoneOffset() * 60000;
+  const localEnd = new Date(end.getTime() - offset);
+  return localEnd.toISOString().slice(0, -1);
 };
